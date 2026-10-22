@@ -1,6 +1,4 @@
-#include "controle.h"
-#include "temporizador.h"
-#include "definicao_de_pinos.h"
+#include "controle.hpp"
 
 uint16_t ultimo_ciclo = 0;
 uint16_t ciclo_atual = 0;

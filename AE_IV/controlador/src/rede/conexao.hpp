@@ -1,7 +1,7 @@
 #ifndef CONEXAO_HPP
 #define CONEXAO_HPP
 
-#include "../../rede.hpp"
+#include "../../controlador.hpp"
 
 // ---------------------------------------------------------------------
 // Varredura de redes (assíncrona, para não travar o servidor)

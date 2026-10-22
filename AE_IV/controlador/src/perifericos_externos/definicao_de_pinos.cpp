@@ -1,4 +1,4 @@
-#include "definicao_de_pinos.h"
+#include "definicao_de_pinos.hpp"
 
 void setup_pinos() {
   pinMode(PINO_LIGA, INPUT_PULLUP);

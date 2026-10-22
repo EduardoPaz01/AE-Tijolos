@@ -1,7 +1,7 @@
 #ifndef SERIAL_HPP
 #define SERIAL_HPP
 
-#include "../../rede.hpp"
+#include "../../controlador.hpp"
 
 // Monta e imprime (texto legível + 1 linha JSON) todas as informações
 // úteis de rede: usado pelo comando "$GET.ALL".

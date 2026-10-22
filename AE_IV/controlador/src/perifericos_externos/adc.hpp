@@ -1,5 +1,5 @@
-#ifndef ADC_H_
-#define ADC_H_
+#ifndef ADC_HPP
+#define ADC_HPP
 
 #include <Arduino.h>
 

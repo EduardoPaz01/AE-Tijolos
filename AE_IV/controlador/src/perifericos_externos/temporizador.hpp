@@ -1,5 +1,5 @@
-#ifndef TEMPORIZADOR_H_
-#define TEMPORIZADOR_H_
+#ifndef TEMPORIZADOR_HPP
+#define TEMPORIZADOR_HPP
 
 #include <Arduino.h>
 

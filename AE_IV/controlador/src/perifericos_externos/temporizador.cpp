@@ -1,4 +1,4 @@
-#include "temporizador.h"
+#include "temporizador.hpp"
 
 volatile uint16_t milisegundos = 0;
 volatile uint8_t  segundos = 0;

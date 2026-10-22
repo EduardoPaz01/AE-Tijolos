@@ -1,7 +1,7 @@
 #ifndef CREDENCIAIS_HPP
 #define CREDENCIAIS_HPP
 
-#include "../../rede.hpp"
+#include "../../controlador.hpp"
 
 // Carrega credenciais da flash (Preferences) para as variáveis globais.
 void carregarCredenciais();

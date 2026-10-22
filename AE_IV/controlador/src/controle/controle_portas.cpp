@@ -1,5 +1,4 @@
-#include "controle_portas.h"
-#include "definicao_de_pinos.h"
+#include "controle_portas.hpp"
 
 uint8_t aux_fim_curso = 0;
 

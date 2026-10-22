@@ -1,7 +1,7 @@
 #ifndef ROTAS_HPP
 #define ROTAS_HPP
 
-#include "../../rede.hpp"
+#include "../../controlador.hpp"
 
 // Rotas HTTP do servidor web (WebServer)
 void handleRoot();

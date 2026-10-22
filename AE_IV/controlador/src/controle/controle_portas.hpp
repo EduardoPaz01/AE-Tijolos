@@ -1,7 +1,9 @@
-#ifndef CONTROLE_PORTAS_H_
-#define CONTROLE_PORTAS_H_
+#ifndef CONTROLE_PORTAS_HPP
+#define CONTROLE_PORTAS_HPP
 
 #include <Arduino.h>
+
+#include "../perifericos_externos/definicao_de_pinos.hpp"
 
 #define ABRE  1
 #define FECHA 2

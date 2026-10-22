@@ -1,7 +1,7 @@
 #ifndef REDE_PROPRIA_HPP
 #define REDE_PROPRIA_HPP
 
-#include "../../rede.hpp"
+#include "../../controlador.hpp"
 
 // Inicia o mDNS (hostname.local) e o servidor web (WebServer)
 void iniciarMDNS();

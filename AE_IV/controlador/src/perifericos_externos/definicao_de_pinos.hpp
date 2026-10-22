@@ -1,5 +1,5 @@
-#ifndef DEFINICAO_DE_PINOS_H_
-#define DEFINICAO_DE_PINOS_H_
+#ifndef DEFINICAO_DE_PINOS_HPP
+#define DEFINICAO_DE_PINOS_HPP
 
 #include <Arduino.h>
 
