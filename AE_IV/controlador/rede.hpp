@@ -55,6 +55,7 @@
 #include "src/rede/rotas.hpp"
 #include "src/perifericos_externos/serial.hpp"
 #include "src/utilidades/utilidades.hpp"
+#include "src/perifericos_externos/lcd.hpp"
 
 #include "src/perifericos_externos/adc.hpp"
 #include "src/controle/controle_portas.hpp"

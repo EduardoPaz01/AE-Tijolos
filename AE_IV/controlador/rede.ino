@@ -37,6 +37,7 @@ void setup() {
     iniciarMDNS();
     Serial.print("Conectado! IP: ");
     Serial.println(WiFi.localIP());
+    lcd_print_ip(WiFi.localIP());
   } else {
     // 2) Sem rede salva (ou falhou): abre o portal de configuração.
     WiFi.disconnect(false, false);
@@ -99,6 +100,7 @@ void loop() {
     tempoSucesso = millis();
     statusEntregue = false;
     iniciarMDNS();
+    lcd_print_ip(WiFi.localIP());
   }
 
   // Sem AP e sem link com o roteador por muito tempo: reabre o AP

@@ -57,6 +57,7 @@ void verificarConexao() {
     tempoSucesso = millis();
     Serial.print("Conectado! IP: ");
     Serial.println(WiFi.localIP());
+    lcd_print_ip(WiFi.localIP());
     return;
   }
 
