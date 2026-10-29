@@ -10,6 +10,6 @@
 #define PINO_ADC_TERMOPAR     26   // canal 9 (o comentário original dizia gpio25, mas canal 9 = GPIO26)
 
 void setup_ADC();
-float printa_ADC(uint8_t canal, float offset, float esforco);
+float ler_ADC(uint8_t canal);
 
 #endif
