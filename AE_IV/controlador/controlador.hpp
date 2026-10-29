@@ -140,31 +140,4 @@ inline uint8_t estadoAtual = DESLIGADO;
 inline uint8_t estadoAnterior = 0;
 inline bool a = false;
 
-// ---------------- Variáveis do controle (antes locais do app_main) ----------------
-inline uint8_t aux = 0;
-inline bool liga = 0;
-
-inline double kp = 0.01654;
-//inline double kd = 0;
-inline double ti = 6954.1029;
-inline double T = 1.0;
-
-inline double ref = 0; // somente para seguimento de degrau
-inline double temp_inicial = 50;
-inline double temp_final = 150;
-inline double tempo_intervalo_i = 100;  // segundos
-inline double tempo_intervalo_f = 5100; // segundos -  1°C /min
-
-inline double alternativa_controle = 1; // 0 para degrau 1 para rampa
-
-inline double u = 0;
-inline double u_anterior = 0;
-inline double e = 0;
-inline double e_anterior = 0;
-//inline double e_2_anterior = 0;
-
-inline double alpha = 0;
-inline double beta = 0;
-//inline double omega = kp * (kd/T);
-
 #endif // CONTROLADOR_HPP
