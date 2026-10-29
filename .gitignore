@@ -1,0 +1,5 @@
+# Pastas em qualquer diretorio/subdiretorio
+**/board/
+
+# Arquivos em qualquer diretorio/subdiretorio
+**/*.log
