@@ -6,6 +6,7 @@
 
 #include "../perifericos_externos/temporizador.hpp"
 #include "../perifericos_externos/definicao_de_pinos.hpp"
+#include "../perifericos_externos/adc.hpp"
 
 // ---------------- Variáveis do controle (antes locais do app_main) ----------------
 inline uint8_t aux = 0;
