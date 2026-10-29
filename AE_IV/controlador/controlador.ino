@@ -77,6 +77,26 @@ void setup() {
 
   alpha = kp * (1.0 + (T / (2.0 * ti)));
   beta  = kp * ((T / (2.0 * ti)) - 1.0);
+
+  // Receita: 0 -> 150°C (3,5°C/min), patamar de mesma duração, 150 -> 0°C
+  double t_rampa = TEMP_MAX_RECEITA / (TAXA_RAMPA_C_MIN / 60.0);   // segundos
+  receita = {
+    { 0.0,          0.0 },
+    { t_rampa,      TEMP_MAX_RECEITA },
+    { 2.0 * t_rampa, TEMP_MAX_RECEITA },
+    { 3.0 * t_rampa, 0.0 }
+  };
+
+  // Controle assíncrono: roda no core que NÃO executa o loop()
+  const BaseType_t coreControle = (ARDUINO_RUNNING_CORE == 0) ? 1 : 0;
+  xTaskCreatePinnedToCore(taskControle, "controle", 8192, nullptr, 1, &hTaskControle, coreControle);
+}
+
+void taskControle(void* param) {
+  for (;;) {
+    loop_controle(receita);
+    vTaskDelay(pdMS_TO_TICKS(10));   // cede a CPU (substitui o antigo delay)
+  }
 }
 
 void loop() {
