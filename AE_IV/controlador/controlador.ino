@@ -77,6 +77,26 @@ void setup() {
 
   alpha = kp * (1.0 + (T / (2.0 * ti)));
   beta  = kp * ((T / (2.0 * ti)) - 1.0);
+
+  // Receita: 0 -> 150°C (3,5°C/min), patamar de mesma duração, 150 -> 0°C
+  double t_rampa = TEMP_MAX_RECEITA / (TAXA_RAMPA_C_MIN / 60.0);   // segundos
+  receita = {
+    { 0.0,          0.0 },
+    { t_rampa,      TEMP_MAX_RECEITA },
+    { 2.0 * t_rampa, TEMP_MAX_RECEITA },
+    { 3.0 * t_rampa, 0.0 }
+  };
+
+  // Controle assíncrono: roda no core que NÃO executa o loop()
+  const BaseType_t coreControle = (ARDUINO_RUNNING_CORE == 0) ? 1 : 0;
+  xTaskCreatePinnedToCore(taskControle, "controle", 8192, nullptr, 1, &hTaskControle, coreControle);
+}
+
+void taskControle(void* param) {
+  for (;;) {
+    loop_controle(receita);
+    vTaskDelay(pdMS_TO_TICKS(10));   // cede a CPU (substitui o antigo delay)
+  }
 }
 
 void loop() {
@@ -119,90 +139,4 @@ void loop() {
   }
 
   if (reiniciarEm && millis() > reiniciarEm) ESP.restart();
-}
-
-void loop_controle() {
-  if (digitalRead(PINO_LIGA)) {
-    liga = 1;
-    Serial.print("Forno LIGADO: ");
-    double delta_t = tempo_intervalo_f - tempo_intervalo_i;
-    double delta_T = temp_final - temp_inicial;
-    double a_coef = (delta_T / delta_t) * 60.0;
-    Serial.printf("a=%.f [°C / min]\n", a_coef);
-  }
-
-  if (aux != segundos) {
-
-    if (!alternativa_controle); // para degrau não há ação
-    else if (alternativa_controle) { // se for rampa, calcula a referencia em cima do tempo
-      uint16_t t = (horas * 60 * 60) + (minutos * 60) + segundos; // em segundos
-      double delta_t = tempo_intervalo_f - tempo_intervalo_i;
-      double delta_T = temp_final - temp_inicial;
-
-      double inclinacao = delta_T / delta_t;
-      //double offset = temp_inicial - inclinacao*tempo_intervalo_i;
-
-      if (t < tempo_intervalo_i) {
-        ref = temp_inicial;
-      }
-      else if (t >= tempo_intervalo_i && t < tempo_intervalo_f) {
-        ref += inclinacao;
-      }
-      else {
-        ref = temp_final;
-      }
-    }
-
-    e = ref - printa_ADC(CANAL_TERMOPAR, ref, u_anterior);
-    u = u_anterior + (alpha * e) + (beta * e_anterior);
-
-    u_anterior = u;
-    //e_2_anterior = e_anterior;
-    e_anterior = e;
-
-    if (u > 1.0) u = 1.0;
-    if (u < 0.01) u = 0.0;
-  }
-  aux = segundos;
-
-  if (liga) {
-    PWM_resistencia(10000, u);
-  }
-
-  /* Máquina de estados (desativada no original)
-    switch (estadoAtual) {
-      case DESLIGADO:
-        if (digitalRead(PINO_LIGA) == 1) estadoAtual = AGUARDANDO_SET_POINT;
-        break;
-      case AGUARDANDO_SET_POINT: {
-        int setpoint_temperatura = 0;
-        // (original usava scanf; no Arduino use Serial.parseInt())
-        if (setpoint_temperatura >= 0) estadoAtual = INICIO_DE_PROCESSO;
-        break; }
-      case INICIO_DE_PROCESSO:
-        if (move_porta(ABRE)) estadoAtual = CARREGAMENTO;
-        break;
-      case CARREGAMENTO:
-        estadoAtual = FORNO_CARREGADO;
-        break;
-      case FORNO_CARREGADO:
-        if (move_porta(FECHA)) estadoAtual = COZIMENTO;
-        break;
-      case COZIMENTO:
-        // liga controle de temperatura + geração de gráficos
-        break;
-      case FIM_DE_PROCESSO:
-        if (move_porta(ABRE)) estadoAtual = DESCARREGAMENTO;
-        break;
-      case DESCARREGAMENTO:
-        estadoAtual = FECHAMENTO_DE_PORTAS;
-        break;
-      case FECHAMENTO_DE_PORTAS:
-        if (move_porta(FECHA)) estadoAtual = AGUARDANDO_SET_POINT;
-        break;
-    }
-    estadoAnterior = estadoAtual;
-  */
-
-  delay(10);
 }
