@@ -4,7 +4,8 @@ uint16_t ultimo_ciclo = 0;
 uint16_t ciclo_atual = 0;
 
 void loop_controle(const std::vector<Ponto>& receita) {
-  float temperatura = ler_ADC(CANAL_TERMOPAR);
+  float temperatura = 20.0f; //ler_ADC();
+  float ref_r;
 
   if (!liga) {                       // liga direto, sem depender do pino
     liga = 1;
@@ -49,7 +50,10 @@ void loop_controle(const std::vector<Ponto>& receita) {
       }
     }
 
-    e = ref - temperatura;
+    //e = ref - temperatura;
+
+    e = ref_r - temperatura;
+
     u = u_anterior + (alpha * e) + (beta * e_anterior);
 
     u_anterior = u;
@@ -71,9 +75,11 @@ void loop_controle(const std::vector<Ponto>& receita) {
       segundos;
   uint32_t tempo_processo = tempo_total - t_inicio_receita;
 
+  float ruido_pct = ((float)random(-300,301)/10000.0f); // ruído de até ±3% da referência
+  ref_r = ref * (1.0 + ruido_pct);
   Serial.printf("%lu,%.2f,%.2f, %.2f\n",
                 (unsigned long)tempo_processo,
-                temperatura, ref,
+                ref, ref_r,
                 u * 100.0);
 
   /* Máquina de estados (desativada no original)

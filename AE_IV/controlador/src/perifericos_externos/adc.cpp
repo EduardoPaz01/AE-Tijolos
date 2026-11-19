@@ -2,13 +2,13 @@
 
 void setup_ADC() {
   analogReadResolution(12);                               // ADC_BITWIDTH_DEFAULT (12 bits)
-  analogSetPinAttenuation(PINO_ADC_FIM_DE_CURSO, ADC_0db);
+  //analogSetPinAttenuation(PINO_ADC_FIM_DE_CURSO, ADC_0db);
   analogSetPinAttenuation(PINO_ADC_TERMOPAR, ADC_0db);    // ADC_ATTEN_DB_0
 }
 
-float ler_ADC(uint8_t canal) {
-  int pino = (canal == CANAL_TERMOPAR) ? PINO_ADC_TERMOPAR : PINO_ADC_FIM_DE_CURSO;
-  int adc_leitura = analogRead(pino);
+float ler_ADC() {
+  //int pino = (canal == CANAL_TERMOPAR) ? PINO_ADC_TERMOPAR : PINO_ADC_FIM_DE_CURSO;
+  int adc_leitura = analogRead(PINO_ADC_TERMOPAR);
 
   float temp_bruta = 0;
 
