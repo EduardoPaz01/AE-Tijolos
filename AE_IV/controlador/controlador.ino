@@ -56,6 +56,8 @@ void setup() {
   server.on("/conectar", HTTP_POST, handleConectar);
   server.on("/status", HTTP_GET, handleStatus);
   server.on("/esquecer", HTTP_POST, handleEsquecer);
+  server.on("/temperatura", HTTP_GET, handleTemperatura);
+  server.on("/medida-iniciar", HTTP_POST, handleMedidaIniciar);
 
   // Detecção de portal cativo (Apple / Android / Windows)
   server.on("/hotspot-detect.html", HTTP_GET, handleCaptivePortalRedirect);

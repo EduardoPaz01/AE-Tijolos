@@ -43,6 +43,7 @@
 #include <ESPmDNS.h>
 #include <Preferences.h>
 #include <esp_wifi.h>
+#include <HTTPClient.h>
 
 #include "src/front/app_html.hpp"
 #include "src/front/app_style.hpp"

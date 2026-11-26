@@ -24,9 +24,11 @@ if (!is_array($data) || !isset($data['idEnsaio']) || $data['idEnsaio'] === '') {
 }
 
 $idEnsaio              = (int) $data['idEnsaio'];                                                  // NOT NULL
-$tempo                 = isset($data['tempo']) ? (float) $data['tempo'] : null;                    // DECIMAL(6,4)
-$temperaturaReal       = isset($data['temperaturaReal']) ? (float) $data['temperaturaReal'] : null; // DECIMAL(6,2)
-$temperaturaReferencia = isset($data['temperaturaReferencia']) ? (float) $data['temperaturaReferencia'] : null; // DECIMAL(6,2)
+$tempo                 = isset($data['tempo']) ? (float) $data['tempo'] : null;                    // DECIMAL(6,4) em minutos
+$temperaturaReal       = isset($data['temperatura']) ? (float) $data['temperatura']
+                       : (isset($data['temperaturaReal']) ? (float) $data['temperaturaReal'] : null); // ref_r da IHM
+$temperaturaReferencia = isset($data['temperatura']) ? (float) $data['temperatura']
+                       : (isset($data['temperaturaReferencia']) ? (float) $data['temperaturaReferencia'] : null);
 
 $sql = "INSERT INTO Medida (idEnsaio, tempo, temperaturaReal, temperaturaReferencia) VALUES (?, ?, ?, ?)";
 $stmt = $con->prepare($sql);

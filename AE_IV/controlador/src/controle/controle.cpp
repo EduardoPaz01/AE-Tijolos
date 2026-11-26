@@ -3,9 +3,31 @@
 uint16_t ultimo_ciclo = 0;
 uint16_t ciclo_atual = 0;
 
+static void enviarMedidaAoBanco(uint32_t tempo_processo_s, float temperatura_ref) {
+  if (!envio_medidas_ativo || id_ensaio_medidas == 0 || api_base_medidas.length() == 0) return;
+  if (WiFi.status() != WL_CONNECTED) return;
+
+  HTTPClient http;
+  http.begin(api_base_medidas + "medida_post.php");
+  http.addHeader("Content-Type", "application/json");
+
+  float tempo_minutos = tempo_processo_s / 60.0f;
+  String payload = "{\"idEnsaio\":" + String((unsigned long)id_ensaio_medidas);
+  payload += ",\"tempo\":" + String(tempo_minutos, 4);
+  payload += ",\"temperatura\":" + String(temperatura_ref, 2) + "}";
+
+  int codigo = http.POST(payload);
+  if (codigo < 0) {
+    Serial.printf("Erro HTTP ao salvar medida: %s\n", http.errorToString(codigo).c_str());
+  } else if (codigo >= 300) {
+    Serial.printf("Falha ao salvar medida: HTTP %d\n", codigo);
+  }
+  http.end();
+}
+
 void loop_controle(const std::vector<Ponto>& receita) {
   float temperatura = 20.0f; //ler_ADC();
-  float ref_r;
+  float ref_r = ref;
 
   if (!liga) {                       // liga direto, sem depender do pino
     liga = 1;
@@ -50,7 +72,10 @@ void loop_controle(const std::vector<Ponto>& receita) {
       }
     }
 
-    //e = ref - temperatura;
+    // Ruído aplicado à referência desejada (temperatura da medida)
+    float ruido_pct = ((float)random(-300,301)/10000.0f); // ruído de até ±3%
+    ref_r = ref * (1.0f + ruido_pct);
+    temperatura_ultima_medida = ref_r;
 
     e = ref_r - temperatura;
 
@@ -66,7 +91,7 @@ void loop_controle(const std::vector<Ponto>& receita) {
   aux = segundos;
 
   if (liga) {
-    PWM_resistencia(10000, u);
+    PWM_resistencia(10000, 0.9);
   }
 
   uint32_t tempo_total =
@@ -75,12 +100,13 @@ void loop_controle(const std::vector<Ponto>& receita) {
       segundos;
   uint32_t tempo_processo = tempo_total - t_inicio_receita;
 
-  float ruido_pct = ((float)random(-300,301)/10000.0f); // ruído de até ±3% da referência
-  ref_r = ref * (1.0 + ruido_pct);
-  Serial.printf("%lu,%.2f,%.2f, %.2f\n",
-                (unsigned long)tempo_processo,
-                ref, ref_r,
-                u * 100.0);
+  if (tempo_ultima_medida_s != tempo_processo) {
+    tempo_ultima_medida_s = tempo_processo;
+    Serial.printf("%lu,%.2f\n",
+                  (unsigned long)tempo_processo,
+                  temperatura_ultima_medida);
+    enviarMedidaAoBanco(tempo_processo, temperatura_ultima_medida);
+  }
 
   /* Máquina de estados (desativada no original)
     switch (estadoAtual) {

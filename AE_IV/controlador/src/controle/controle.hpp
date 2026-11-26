@@ -57,4 +57,11 @@ void loop_controle(const std::vector<Ponto>& receita);
 // Faz o PWM da resistência com período em ms e duty cycle de 0 a 1.0
 void PWM_resistencia(uint16_t periodo_m, float duty);
 
+// ----- Envio das medidas ao banco de dados -----
+inline uint64_t id_ensaio_medidas = 0;
+inline String api_base_medidas = "";
+inline uint32_t tempo_ultima_medida_s = 0;
+inline float temperatura_ultima_medida = 0.0f;
+inline bool envio_medidas_ativo = false;
+
 #endif

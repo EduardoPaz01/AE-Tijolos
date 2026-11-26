@@ -84,6 +84,10 @@ const DatabaseAdapter = {
   async listPontos() {
     return this._call('ponto_consult.php');
   },
+  async listMedidas(idEnsaio) {
+    const suffix = idEnsaio ? ('?idEnsaio=' + encodeURIComponent(idEnsaio)) : '';
+    return this._call('medida_consult.php' + suffix);
+  },
 
   // ---- Ciclo de vida de uma curva (Receita + seus Pontos) ----
 
@@ -113,6 +117,25 @@ const DatabaseAdapter = {
   // POST ponto_update.php → grava o tempo ACUMULADO (min) do ponto
   async updateSegmentDuration(segmentDbId, cumulativeMinutes) {
     await this._call('ponto_update.php', { method: 'POST', body: { idPonto: segmentDbId, tempo: cumulativeMinutes } });
+  },
+
+  // POST ensaio_post.php → cria o registro de execução associado à receita
+  async createExecution(idReceita, idUsuario, titulo) {
+    const data = await this._call('ensaio_post.php', {
+      method: 'POST',
+      body: { idReceita, idUsuario, nome: titulo, data: new Date().toISOString().slice(0, 19).replace('T', ' ') }
+    });
+    return { idEnsaio: data.idEnsaio };
+  },
+
+  async startMeasurementUpload(idEnsaio) {
+    const r = await fetch('/medida-iniciar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'idEnsaio=' + encodeURIComponent(idEnsaio) +
+            '&apiBase=' + encodeURIComponent(CONFIG.API_BASE)
+    });
+    if (!r.ok) throw new Error((await r.text()) || ('HTTP ' + r.status));
   },
 
   // POST ponto_delete.php
@@ -194,7 +217,8 @@ let session = { idUsuario: null, nomeUsuario: null };
 // ---- Estado da aplicação ----
 let appState = {
   currentAssayId: null,
-  p0Value: null, // temperatura inicial: o operador informa (varia a cada dia)
+  currentExecutionId: null,
+  p0Value: null,
   p0DbId: null,
   segments: [],
   nextId: 1,
@@ -336,7 +360,7 @@ async function goHome() {
 }
 
 function resetLocalState() {
-  appState = { currentAssayId: null, p0Value: null, p0DbId: null, segments: [], nextId: 1, finalized: false, started: false, source: null };
+  appState = { currentAssayId: null, currentExecutionId: null, p0Value: null, p0DbId: null, segments: [], nextId: 1, finalized: false, started: false, source: null };
   UI.nextTempInput.value = '';
   UI.nextTempInput.disabled = false;
   UI.tempWarning.style.display = 'none';
@@ -615,7 +639,7 @@ async function addSegment() {
 
   UI.addBtn.disabled = true;
   try {
-    if (appState.p0Value === null) {
+    if appState.p0Value === null) {
       // Primeiro valor digitado = temperatura inicial (P0). Gravada como Ponto nOrdem 0, tempo 0.
       const r0 = await DatabaseAdapter.createSegment(appState.currentAssayId, v, 0);
       await DatabaseAdapter.updateSegmentDuration(r0.dbId, 0);
@@ -815,12 +839,31 @@ function updateHint() {
 }
 
 // ==================== FINALIZAÇÃO ====================
-UI.finishBtn.addEventListener('click', () => {
+UI.finishBtn.addEventListener('click', async () => {
   const valid = appState.segments.length > 0 && appState.segments.every(s => s.duration !== null && s.duration > 0);
   if (!valid) {
     flashHint('⚠ Falta preencher o tempo de algum ponto.', true);
     return;
   }
+
+  if (!appState.currentAssayId || !session.idUsuario) {
+    flashHint('⚠ Salve a receita e faça login antes de iniciar o ensaio.', true);
+    return;
+  }
+
+  try {
+    const exec = await DatabaseAdapter.createExecution(
+      appState.currentAssayId,
+      session.idUsuario,
+      'Ensaio da receita ' + appState.currentAssayId
+    );
+    appState.currentExecutionId = exec.idEnsaio;
+    await DatabaseAdapter.startMeasurementUpload(exec.idEnsaio);
+  } catch (e) {
+    flashHint('⚠ Não foi possível iniciar o ensaio: ' + e.message, true);
+    return;
+  }
+
   appState.finalized = true;
   UI.addBtn.style.display = 'none';
   UI.finishBtn.style.display = 'none';
@@ -1247,7 +1290,21 @@ async function readEsp() {
     clearTimeout(to);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const j = await res.json();
-    const v = parseFloat(j.temperatura);
+    let v = parseFloat(j.temperatura);
+
+    if (appState.currentExecutionId) {
+      try {
+        const medidas = await DatabaseAdapter.listMedidas(appState.currentExecutionId);
+        const validas = (Array.isArray(medidas) ? medidas : []).filter(m => m && !m.error);
+        if (validas.length) {
+          const ultima = validas[validas.length - 1];
+          v = parseFloat(ultima.temperaturaReferencia ?? ultima.temperaturaReal);
+        }
+      } catch (_) {
+        // Mantém a leitura direta do ESP32 caso o banco esteja temporariamente indisponível.
+      }
+    }
+
     if (isNaN(v)) throw new Error('JSON sem o campo "temperatura"');
     if (live.t0 === null) live.t0 = Date.now();
     live.data.push({ t: (Date.now() - live.t0) / 1000, v });

@@ -99,3 +99,23 @@ void handleEsquecer() {
   server.send(200, "text/plain", "ok");
   reiniciarEm = millis() + 1000;
 }
+
+void handleMedidaIniciar() {
+  if (!server.hasArg("idEnsaio") || !server.hasArg("apiBase")) {
+    server.send(400, "text/plain", "Parametros idEnsaio e apiBase obrigatorios");
+    return;
+  }
+
+  id_ensaio_medidas = strtoull(server.arg("idEnsaio").c_str(), nullptr, 10);
+  api_base_medidas = server.arg("apiBase");
+  if (!api_base_medidas.endsWith("/")) api_base_medidas += "/";
+  envio_medidas_ativo = id_ensaio_medidas > 0;
+  tempo_ultima_medida_s = 0;
+  server.send(200, "application/json", "{\"success\":true}");
+}
+
+void handleTemperatura() {
+  String j = "{\"temperatura\":" + String(temperatura_ultima_medida, 2);
+  j += ",\"tempo\":" + String(tempo_ultima_medida_s) + "}";
+  server.send(200, "application/json", j);
+}

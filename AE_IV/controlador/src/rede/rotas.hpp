@@ -30,4 +30,10 @@ void handleStatus();
 // POST /esquecer -> apaga credenciais e reinicia (volta a abrir o AP)
 void handleEsquecer();
 
+// POST /medida-iniciar (idEnsaio, apiBase)
+void handleMedidaIniciar();
+
+// GET /temperatura -> referência ruidosa usada pelo processo
+void handleTemperatura();
+
 #endif // ROTAS_HPP

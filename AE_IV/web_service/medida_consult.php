@@ -10,6 +10,12 @@ $con->set_charset("utf8");
 json_decode(file_get_contents('php://input'), true);
 
 $sql = "SELECT * FROM Medida";
+if (isset($_GET['idEnsaio']) && $_GET['idEnsaio'] !== '') {
+  $idEnsaio = (int) $_GET['idEnsaio'];
+  $sql .= " WHERE idEnsaio = " . $idEnsaio;
+}
+$sql .= " ORDER BY tempo ASC, idMedida ASC";
+
 $result = $con->query($sql);
 
 $response = [];
