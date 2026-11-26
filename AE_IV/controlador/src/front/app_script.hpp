@@ -11,7 +11,13 @@ const char app_js[] PROGMEM = R"rawliteral(
  * 'http://localhost/banco-de-dados/' (com a barra final).
  */
 const CONFIG = {
-  API_BASE: 'http://localhost:81/'
+  API_BASE: (() => {
+    try {
+      const salvo = localStorage.getItem('apiBase');
+      if (salvo) return salvo;
+    } catch (_) {}
+    return 'http://192.168.0.100:81/'; // <-- IP do PC com o Laragon
+  })()
 };
 
 /**
@@ -639,7 +645,7 @@ async function addSegment() {
 
   UI.addBtn.disabled = true;
   try {
-    if appState.p0Value === null) {
+    if (appState.p0Value === null) {
       // Primeiro valor digitado = temperatura inicial (P0). Gravada como Ponto nOrdem 0, tempo 0.
       const r0 = await DatabaseAdapter.createSegment(appState.currentAssayId, v, 0);
       await DatabaseAdapter.updateSegmentDuration(r0.dbId, 0);

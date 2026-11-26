@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 #include <vector>
+#include <WiFi.h>
+#include <HTTPClient.h>
 
 #include "../perifericos_externos/temporizador.hpp"
 #include "../perifericos_externos/definicao_de_pinos.hpp"
